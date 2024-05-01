@@ -1,18 +1,16 @@
 class transform:
     def head(self, dataset, steps): #return the top N records from the dataset
-        for step in range(steps):
-            return dataset[step]
+        return dataset[:steps]
             
     def tail(self, dataset, steps): #return the last N records from the dataset
-        for step in range(steps):
-            return dataset[-steps:]
+        return dataset[-steps:]
             
     def rename_attribute(self, dataset, old_name, new_name): #rename a column in the dataset
         new_dataset = []
         for row in dataset:
             new_row = row.copy()
-            if old_name in new_row:
-                row[new_name] = row.pop(old_name)
+            if old_name in row:
+                new_row[new_name] = new_row[old_name]
             new_dataset.append(new_row)
         return new_dataset
     
@@ -22,11 +20,14 @@ class transform:
         ]
     
     def rename_attributes(self, dataset, old_names, new_names): #rename a list of columns in the dataset
-        new_dataset = dataset.copy()
-        for row in new_dataset:
-            for old_name, new_name in zip(old_names, new_names):
+        new_dataset = []
+        for row in dataset:
+            new_row = row.copy()
+            for i, (old_name, new_name) in enumerate(zip(old_names, new_names)):
                 if old_name in row:
-                    row[new_name] = row.pop(old_name)
+                    new_row[new_name] = new_row[old_name]
+                    del new_row[old_name]
+            new_dataset.append(new_row)
         return new_dataset
     
     def remove_attributes(self, dataset, columns_to_remove): #remove a list of columns in the dataset
@@ -34,7 +35,12 @@ class transform:
                        for row in dataset]
         return new_dataset
             
-    def transform(self, dataset):
-        dataset_after_remove = self.remove_attributes(dataset, ['Bank Name', 'City', 'Cert', 'Acquiring Institution', 'Fund'])
-        dataset_after_rename = self.rename_attribute(dataset_after_remove, 'State', 'State Abbreviation')
-        return dataset_after_rename
+    def transform(self, dataset, columns_to_remove=None, renames=None):
+        new_dataset = dataset[:]
+        # Remove attributes
+        if columns_to_remove is not None:
+            new_dataset = self.remove_attributes(new_dataset, columns_to_remove)
+        # Rename attributes
+        if renames is not None:
+            new_dataset = self.rename_attributes(new_dataset, list(renames.keys()), list(renames.values()))
+        return new_dataset
