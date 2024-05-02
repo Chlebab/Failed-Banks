@@ -2,7 +2,7 @@ import csv
 from extract import extract  # Import the external extract class
 from transform import transform  # Import the external transform class
 
-class Load:
+class load:
     """
     A class to handle the loading of data into CSV files.
     
